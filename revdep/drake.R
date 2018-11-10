@@ -8,13 +8,13 @@ subset_available <- function(available, pkg) {
   }
 }
 
-download <- function(pkg, available, ...) {
+download <- function(pkg, available_download, ...) {
   dir <- fs::dir_create("revdep/download")
   dir <- fs::path_real(dir)
 
   withr::with_options(
     list(warn = 2),
-    download.packages(pkg, dir, available = available)[, 2]
+    download.packages(pkg, dir, available = available_download, repos = revdepcheck:::get_repos(TRUE))[, 2]
   )
 }
 

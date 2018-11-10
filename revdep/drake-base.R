@@ -29,10 +29,11 @@ retry <- function(code, N = 1) {
 get_plan_deps <- function() {
   plan_deps <- drake_plan(
     available = available.packages(),
+    available_download = available.packages(repos = revdepcheck:::get_repos(TRUE)),
     this_pkg = get_this_pkg(),
     revdeps = tools::package_dependencies(this_pkg, available, 'most', reverse = TRUE) %>% flatten(),
-    first_level_deps = tools::package_dependencies(revdeps, available, 'most'),
-    all_level_deps = tools::package_dependencies(first_level_deps %>% flatten(), available, recursive = TRUE),
+    first_level_deps = tools::package_dependencies(revdeps, available_download, 'most'),
+    all_level_deps = tools::package_dependencies(first_level_deps %>% flatten(), available_download, recursive = TRUE),
     base_pkgs = get_base_pkgs(),
     deps = c(revdeps, first_level_deps, all_level_deps) %>% flatten() %>% tools::package_dependencies(recursive = TRUE) %>% .[!(names(.) %in% base_pkgs)],
     strings_in_dots = "literals"
