@@ -10,29 +10,8 @@ fortran: false
 jobs:
   include:
   - r: devel
-  - os: osx
-  - r: release
     after_success:
-    - Rscript -e 'covr::codecov()'
-    before_cache:
-    - Rscript -e 'remotes::install_cran("pkgdown")'
-    - Rscript -e 'remotes::install_github("tidyverse/tidytemplate")'
-    deploy:
-      provider: script
-      script: Rscript -e 'pkgdown::deploy_site_github(verbose = TRUE)'
-      skip_cleanup: true
-  - r: 3.4
-  - r: 3.3
-  - r: 3.2
-    warnings_are_errors: false
-  - r: release
-    env:
-      - DEVEL_PACKAGES=true
-    r_github_packages:
-      - RcppCore/Rcpp
-      - r-lib/rlang
-      - tidyverse/tibble
-      - tidyverse/tidyselect
+    - Rscript -e 'print(tools:::.check_package_ASCII_code("."))'
 
 matrix:
   fast_finish: true
