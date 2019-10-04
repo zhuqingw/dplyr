@@ -174,13 +174,18 @@ tbl_at_syms <- function(tbl, vars, .include_group_vars = FALSE) {
 tbl_if_info <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   if (.include_group_vars) {
     tibble_vars <- tbl_vars(.tbl)
+    inds <- seq_along(tibble_vars)
   } else {
-    tibble_vars <- tbl_nongroup_vars(.tbl)
+    inds <- tbl_nongroup_inds(.tbl)
+    tibble_vars <- tbl_vars(.tbl)[inds]
   }
 
   if (is_logical(.p)) {
     stopifnot(length(.p) == length(tibble_vars))
-    return(list(vars = tibble_vars, sel = .p))
+    return(list(
+      vars = tibble_vars[.p],
+      inds = inds[.p]
+    ))
   }
 
   if (inherits(.tbl, "tbl_lazy")) {
@@ -209,23 +214,21 @@ tbl_if_info <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   }
 
   list(
-    vars = tibble_vars,
-    sel = selected
+    vars = tibble_vars[selected],
+    inds = inds[selected]
   )
 }
 
 tbl_if_vars <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   info <- tbl_if_info(.tbl, .p, .env, ..., .include_group_vars = .include_group_vars)
-  info$vars[info$sel]
+  info$vars
 }
 tbl_if_syms <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   syms(tbl_if_vars(.tbl, .p, .env, ..., .include_group_vars = .include_group_vars))
 }
 tbl_if_inds <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   info <- tbl_if_info(.tbl, .p, .env, ..., .include_group_vars = .include_group_vars)
-  inds <- seq_along(info$vars)[info$sel]
-  vars <- info$vars[info$sel]
-  set_names(inds, vars)
+  set_names(info$inds, info$vars)
 }
 
 # The lambda must inherit from:

@@ -42,3 +42,14 @@ test_that("lists of formulas are auto-named", {
   out <- df %>% summarise_all(list(foobar = ~ mean(.), ~sd(.x, na.rm = TRUE)))
   expect_named(out, c("x_foobar", "y_foobar", "x_sd", "y_sd"))
 })
+
+test_that("tbl_if_inds() supports duplicates", {
+  df <- new_tibble(list(a = 1, b = 2, a = 3), nrow = 1)
+  expect_identical(tbl_if_inds(df, c(TRUE, FALSE, TRUE)), c(a = 1L, a = 3L))
+
+  gdf <- new_tibble(list(a = 1, b = 2, a = 3), nrow = 1) %>% group_by(b)
+  expect_identical(tbl_if_inds(df, c(TRUE, FALSE, TRUE)), c(a = 1L, a = 3L))
+
+  inds <- tbl_if_inds(df, c(TRUE, TRUE, TRUE), .include_group_vars = TRUE)
+  expect_identical(inds, c(a = 1L, b = 2L, a = 3L))
+})

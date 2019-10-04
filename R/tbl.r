@@ -76,6 +76,19 @@ tbl_vars <- function(x) {
 tbl_nongroup_vars <- function(x) {
   setdiff(tbl_vars(x), group_vars(x))
 }
+tbl_nongroup_inds <- function(x) {
+  vars <- tbl_vars(x)
+  inds <- seq_along(vars)
+
+  # This assumes grouping variables do not have duplicates
+  group_inds <- match(group_vars(x), vars)
+
+  if (length(group_inds)) {
+    inds[-group_inds]
+  } else {
+    inds
+  }
+}
 
 is_sel_vars <- function(x) {
   inherits(x, "dplyr_sel_vars")
