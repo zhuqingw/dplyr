@@ -48,7 +48,8 @@
 select_all <- function(.tbl, .funs = list(), ...) {
   funs <- as_fun_list(.funs, caller_env(), ...)
   vars <- tbl_vars(.tbl)
-  inds <- vars_select_inds(vars, funs, .tbl)
+  vars_inds <- seq_along(vars)
+  inds <- vars_select_inds(vars, funs, .tbl, inds = vars_inds)
   select(.tbl, !!inds)
 }
 #' @rdname select_all
@@ -56,7 +57,8 @@ select_all <- function(.tbl, .funs = list(), ...) {
 rename_all <- function(.tbl, .funs = list(), ...) {
   funs <- as_fun_list(.funs, caller_env(), ...)
   vars <- tbl_vars(.tbl)
-  inds <- vars_select_inds(vars, funs, .tbl, strict = TRUE)
+  vars_inds <- seq_along(vars)
+  inds <- vars_select_inds(vars, funs, .tbl, strict = TRUE, inds = vars_inds)
   rename(.tbl, !!!inds) # FIXME: Use `!!` with tidyselect 0.3.0
 }
 
@@ -100,7 +102,7 @@ rename_at <- function(.tbl, .vars, .funs = list(), ...) {
   rename(.tbl, !!!inds) # FIXME: Use `!!` with tidyselect 0.3.0
 }
 
-vars_select_inds <- function(vars, funs, tbl, strict = FALSE) {
+vars_select_inds <- function(vars, funs, tbl, strict = FALSE, inds = NULL) {
   if (length(funs) > 1) {
     bad_args(".funs", "must contain one renaming function, not {length(funs)}")
   }
@@ -109,7 +111,10 @@ vars_select_inds <- function(vars, funs, tbl, strict = FALSE) {
   }
 
   tbl_vars <- tbl_vars(tbl)
-  inds <- match(vars, tbl_vars)
+  if (is.null(inds)) {
+    # This `match()` call doesn't handle duplicates in `vars` properly
+    inds <- match(vars, tbl_vars)
+  }
 
   if (length(funs) == 1) {
     fun <- funs[[1]]
