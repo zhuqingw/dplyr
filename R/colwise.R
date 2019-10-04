@@ -171,7 +171,7 @@ tbl_at_syms <- function(tbl, vars, .include_group_vars = FALSE) {
 }
 
 # Requires tbl_vars(), `[[`() and length() methods
-tbl_if_vars <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
+tbl_if_info <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   if (.include_group_vars) {
     tibble_vars <- tbl_vars(.tbl)
   } else {
@@ -180,7 +180,7 @@ tbl_if_vars <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
 
   if (is_logical(.p)) {
     stopifnot(length(.p) == length(tibble_vars))
-    return(syms(tibble_vars[.p]))
+    return(list(vars = tibble_vars, sel = .p))
   }
 
   if (inherits(.tbl, "tbl_lazy")) {
@@ -208,7 +208,15 @@ tbl_if_vars <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
     selected[[i]] <- isTRUE(eval_tidy(.p(column, ...)))
   }
 
-  tibble_vars[selected]
+  list(
+    vars = tibble_vars,
+    sel = selected
+  )
+}
+
+tbl_if_vars <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
+  info <- tbl_if_info(.tbl, .p, .env, ..., .include_group_vars = .include_group_vars)
+  info$vars[info$sel]
 }
 tbl_if_syms <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   syms(tbl_if_vars(.tbl, .p, .env, ..., .include_group_vars = .include_group_vars))
