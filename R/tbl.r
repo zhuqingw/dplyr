@@ -71,6 +71,11 @@ tbl_vars <- function(x) {
   # For roxygen and static analysis
   UseMethod("tbl_vars")
 }
+tbl_inds <- function(x) {
+  vars <- tbl_vars(x)
+  set_names(seq_along(vars), vars)
+}
+
 #' @rdname tbl_vars
 #' @export
 tbl_nongroup_vars <- function(x) {

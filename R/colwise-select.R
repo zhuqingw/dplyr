@@ -47,18 +47,16 @@
 #' @export
 select_all <- function(.tbl, .funs = list(), ...) {
   funs <- as_fun_list(.funs, caller_env(), ...)
-  vars <- tbl_vars(.tbl)
-  vars_inds <- seq_along(vars)
-  inds <- vars_select_inds(vars, funs, .tbl, inds = vars_inds)
+  inds <- tbl_inds(.tbl)
+  inds <- vars_select_inds(names(inds), funs, .tbl, inds = inds)
   select(.tbl, !!inds)
 }
 #' @rdname select_all
 #' @export
 rename_all <- function(.tbl, .funs = list(), ...) {
   funs <- as_fun_list(.funs, caller_env(), ...)
-  vars <- tbl_vars(.tbl)
-  vars_inds <- seq_along(vars)
-  inds <- vars_select_inds(vars, funs, .tbl, strict = TRUE, inds = vars_inds)
+  inds <- tbl_inds(.tbl)
+  inds <- vars_select_inds(names(inds), funs, .tbl, strict = TRUE, inds = inds)
   rename(.tbl, !!!inds) # FIXME: Use `!!` with tidyselect 0.3.0
 }
 
