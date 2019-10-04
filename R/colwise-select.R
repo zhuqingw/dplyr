@@ -69,8 +69,8 @@ select_if <- function(.tbl, .predicate, .funs = list(), ...) {
   if (!is_logical(.predicate)) {
     .predicate <- as_fun_list(.predicate, caller_env())
   }
-  vars <- tbl_if_vars(.tbl, .predicate, caller_env(), .include_group_vars = TRUE)
-  inds <- vars_select_inds(vars, funs, .tbl)
+  inds <- tbl_if_inds(.tbl, .predicate, caller_env(), .include_group_vars = TRUE)
+  inds <- vars_select_inds(names(inds), funs, .tbl, inds = inds)
   select(.tbl, !!inds)
 }
 #' @rdname select_all
@@ -80,8 +80,8 @@ rename_if <- function(.tbl, .predicate, .funs = list(), ...) {
   if (!is_logical(.predicate)) {
     .predicate <- as_fun_list(.predicate, caller_env())
   }
-  vars <- tbl_if_vars(.tbl, .predicate, caller_env(), .include_group_vars = TRUE)
-  inds <- vars_select_inds(vars, funs, .tbl, strict = TRUE)
+  inds <- tbl_if_inds(.tbl, .predicate, caller_env(), .include_group_vars = TRUE)
+  inds <- vars_select_inds(names(inds), funs, .tbl, strict = TRUE, inds = inds)
   rename(.tbl, !!!inds) # FIXME: Use `!!` with tidyselect 0.3.0
 }
 

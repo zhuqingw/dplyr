@@ -221,6 +221,12 @@ tbl_if_vars <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
 tbl_if_syms <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
   syms(tbl_if_vars(.tbl, .p, .env, ..., .include_group_vars = .include_group_vars))
 }
+tbl_if_inds <- function(.tbl, .p, .env, ..., .include_group_vars = FALSE) {
+  info <- tbl_if_info(.tbl, .p, .env, ..., .include_group_vars = .include_group_vars)
+  inds <- seq_along(info$vars)[info$sel]
+  vars <- info$vars[info$sel]
+  set_names(inds, vars)
+}
 
 # The lambda must inherit from:
 # - Execution environment (bound arguments with purrr lambda syntax)
