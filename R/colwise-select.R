@@ -48,16 +48,16 @@
 select_all <- function(.tbl, .funs = list(), ...) {
   funs <- as_fun_list(.funs, caller_env(), ...)
   vars <- tbl_vars(.tbl)
-  syms <- vars_select_syms(vars, funs, .tbl)
-  select(.tbl, !!!syms)
+  inds <- vars_select_inds(vars, funs, .tbl)
+  select(.tbl, !!inds)
 }
 #' @rdname select_all
 #' @export
 rename_all <- function(.tbl, .funs = list(), ...) {
   funs <- as_fun_list(.funs, caller_env(), ...)
   vars <- tbl_vars(.tbl)
-  syms <- vars_select_syms(vars, funs, .tbl, strict = TRUE)
-  rename(.tbl, !!!syms)
+  inds <- vars_select_inds(vars, funs, .tbl, strict = TRUE)
+  rename(.tbl, !!!inds) # FIXME: Use `!!` with tidyselect 0.3.0
 }
 
 #' @rdname select_all
@@ -68,8 +68,8 @@ select_if <- function(.tbl, .predicate, .funs = list(), ...) {
     .predicate <- as_fun_list(.predicate, caller_env())
   }
   vars <- tbl_if_vars(.tbl, .predicate, caller_env(), .include_group_vars = TRUE)
-  syms <- vars_select_syms(vars, funs, .tbl)
-  select(.tbl, !!!syms)
+  inds <- vars_select_inds(vars, funs, .tbl)
+  select(.tbl, !!inds)
 }
 #' @rdname select_all
 #' @export
@@ -79,8 +79,8 @@ rename_if <- function(.tbl, .predicate, .funs = list(), ...) {
     .predicate <- as_fun_list(.predicate, caller_env())
   }
   vars <- tbl_if_vars(.tbl, .predicate, caller_env(), .include_group_vars = TRUE)
-  syms <- vars_select_syms(vars, funs, .tbl, strict = TRUE)
-  rename(.tbl, !!!syms)
+  inds <- vars_select_inds(vars, funs, .tbl, strict = TRUE)
+  rename(.tbl, !!!inds) # FIXME: Use `!!` with tidyselect 0.3.0
 }
 
 #' @rdname select_all
@@ -88,40 +88,44 @@ rename_if <- function(.tbl, .predicate, .funs = list(), ...) {
 select_at <- function(.tbl, .vars, .funs = list(), ...) {
   vars <- tbl_at_vars(.tbl, .vars, .include_group_vars = TRUE)
   funs <- as_fun_list(.funs, caller_env(), ...)
-  syms <- vars_select_syms(vars, funs, .tbl)
-  select(.tbl, !!!syms)
+  inds <- vars_select_inds(vars, funs, .tbl)
+  select(.tbl, !!inds)
 }
 #' @rdname select_all
 #' @export
 rename_at <- function(.tbl, .vars, .funs = list(), ...) {
   vars <- tbl_at_vars(.tbl, .vars, .include_group_vars = TRUE)
   funs <- as_fun_list(.funs, caller_env(), ...)
-  syms <- vars_select_syms(vars, funs, .tbl, strict = TRUE)
-  rename(.tbl, !!!syms)
+  inds <- vars_select_inds(vars, funs, .tbl, strict = TRUE)
+  rename(.tbl, !!!inds) # FIXME: Use `!!` with tidyselect 0.3.0
 }
 
-vars_select_syms <- function(vars, funs, tbl, strict = FALSE) {
+vars_select_inds <- function(vars, funs, tbl, strict = FALSE) {
   if (length(funs) > 1) {
     bad_args(".funs", "must contain one renaming function, not {length(funs)}")
-  } else if (length(funs) == 1) {
+  }
+  if (length(funs) == 0 && strict) {
+    bad_args(".funs", "must specify a renaming function")
+  }
+
+  tbl_vars <- tbl_vars(tbl)
+  inds <- match(vars, tbl_vars)
+
+  if (length(funs) == 1) {
     fun <- funs[[1]]
     if (is_quosure(fun)) {
       fun <- quo_as_function(fun)
     }
-    syms <- if (length(vars)) {
-      set_names(syms(vars), fun(as.character(vars)))
-    } else {
-      set_names(syms(vars))
+    if (length(vars)) {
+      inds <- set_names(inds, fun(as.character(vars)))
     }
-  } else if (!strict) {
-    syms <- syms(vars)
-  } else {
-    bad_args(".funs", "must specify a renaming function")
   }
 
   group_vars <- group_vars(tbl)
-  group_syms <- syms(group_vars)
-  has_group_sym <- group_syms %in% syms
-  new_group_syms <- set_names(group_syms[!has_group_sym], group_vars[!has_group_sym])
-  c(new_group_syms, syms)
+  group_inds <- match(group_vars, tbl_vars)
+
+  has_group <- group_inds %in% inds
+  new_group_inds <- set_names(group_inds[!has_group], group_vars[!has_group])
+
+  c(new_group_inds, inds)
 }
