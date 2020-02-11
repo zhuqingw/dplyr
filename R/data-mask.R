@@ -1,3 +1,4 @@
+#' @importFrom dice vec_parallel_chop
 DataMask <- R6Class("DataMask",
   public = list(
     initialize = function(data, caller, rows = group_rows(data)) {
@@ -21,7 +22,8 @@ DataMask <- R6Class("DataMask",
           }
         }
       } else if (is_grouped_df(data)) {
-        function(index) vec_chop(.subset2(data, index), rows)
+        function(index) vec_parallel_chop(.subset2(data, index), rows)
+        # function(index) vec_chop(.subset2(data, index), rows)
       } else {
         # for ungrouped data frames, there is only one chunk that
         # is made of the full column

@@ -30,7 +30,8 @@ Imports:
     tidyselect (>= 1.0.0),
     utils,
     vctrs (>= 0.2.2),
-    zeallot
+    zeallot, 
+    dice
 Suggests: 
     bit64,
     callr,
@@ -65,4 +66,5 @@ RoxygenNote: 7.0.2
 Remotes:
     tidyverse/tibble,
     r-lib/pillar, 
-    r-lib/rlang
+    r-lib/rlang, 
+    romainfrancois/dice
